@@ -1,0 +1,81 @@
+// NightGuard: PIR motion alarm with a silence button
+// Board: Arduino Uno R3
+// Buzzer: passive (driven with tone/noTone)
+
+// ----- Pin assignments -----
+const uint8_t PIR_PIN    = 2;   // HC-SR501 OUT
+const uint8_t BUZZER_PIN = 8;   // Buzzer I/O
+const uint8_t BUTTON_PIN = 3;   // Push button (other leg to GND)
+
+// ----- Settings -----
+const unsigned int  ALARM_FREQ_HZ = 2000;      // Alarm pitch
+const unsigned long PIR_WARMUP_MS = 60000UL;   // Time for the PIR to settle
+const unsigned long DEBOUNCE_MS   = 30UL;      // Button bounce filter
+
+// ----- State -----
+bool buzzerIsOn        = false;
+bool lastRawButton     = false;   // true = pressed
+bool stableButton      = false;   // debounced button state
+unsigned long lastButtonChange = 0;
+
+void setup() {
+  Serial.begin(9600);
+
+  pinMode(PIR_PIN, INPUT);
+  pinMode(BUTTON_PIN, INPUT_PULLUP);   // Pressed = LOW
+  pinMode(LED_BUILTIN, OUTPUT);
+
+  Serial.println("NightGuard warming up. Keep still...");
+  unsigned long start = millis();
+  unsigned long lastPrint = 0;
+  while (millis() - start < PIR_WARMUP_MS) {
+    if (millis() - lastPrint >= 10000UL) {
+      lastPrint = millis();
+      Serial.print("Seconds left: ");
+      Serial.println((PIR_WARMUP_MS - (millis() - start)) / 1000UL);
+    }
+  }
+
+  Serial.println("NightGuard armed.");
+}
+
+void loop() {
+  // 1. Read the PIR sensor (HIGH = motion)
+  bool motionDetected = (digitalRead(PIR_PIN) == HIGH);
+  digitalWrite(LED_BUILTIN, motionDetected ? HIGH : LOW);
+
+  // 2. Read the button with debouncing
+  bool rawPressed = (digitalRead(BUTTON_PIN) == LOW);
+  if (rawPressed != lastRawButton) {
+    lastRawButton = rawPressed;
+    lastButtonChange = millis();
+  }
+  if (millis() - lastButtonChange >= DEBOUNCE_MS) {
+    stableButton = lastRawButton;
+  }
+
+  // 3. Buzz while motion is detected AND the button is not held.
+  //    Holding the button silences it. Releasing it sounds the alarm
+  //    again immediately if motion is still detected.
+  bool shouldSound = motionDetected && !stableButton;
+
+  // 4. Start or stop the tone only when the state changes
+  if (shouldSound != buzzerIsOn) {
+    buzzerIsOn = shouldSound;
+
+    if (buzzerIsOn) {
+      tone(BUZZER_PIN, ALARM_FREQ_HZ);
+    } else {
+      noTone(BUZZER_PIN);
+    }
+
+    Serial.print("Buzzer: ");
+    Serial.print(buzzerIsOn ? "ON" : "OFF");
+    Serial.print(" | Motion: ");
+    Serial.print(motionDetected ? "YES" : "no");
+    Serial.print(" | Button held: ");
+    Serial.println(stableButton ? "YES" : "no");
+  }
+
+  delay(10);
+}

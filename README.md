@@ -1,48 +1,32 @@
-# 🌙 NightGuard — Arduino Security Alarm
+# NightGuard — Arduino Motion Alarm
 
-**NightGuard** is a beginner-friendly Arduino security project that detects movement and sounds an alarm.
+NightGuard is an Arduino-based prototype that detects movement and activates an alarm.
 
-## ✨ Features
+## Features
 - Motion detection using an HC-SR501 PIR sensor
-- Active buzzer alarm when motion is detected
-- Push button to temporarily silence the alarm
-- Alarm activates again if motion remains after releasing the button
-- Portable power option using a 5V USB power bank
+- Relay module used to switch the alarm
+- Separate battery supply for the alarm circuit
+- DC ON/OFF switch for the alarm power
+- No silence push button in the current design
 
-## 🧰 Components
+## Components
 - Arduino UNO R3
 - HC-SR501 PIR motion sensor
-- Active buzzer module
-- Momentary push button
+- 1-channel 5V relay module
+- Wired alarm/buzzer
+- Battery and battery connector for the alarm supply
+- DC ON/OFF switch
 - Jumper wires
-- USB cable or 5V USB power bank
 
-## 🔌 Wiring
+## Current Design
+The PIR sensor provides the motion signal to the Arduino. The Arduino controls the relay module, which switches the separate alarm circuit. The DC switch is used to turn the alarm supply on or off.
 
-| Component | Arduino UNO R3 |
-|---|---|
-| PIR VCC | 5V |
-| PIR GND | GND |
-| PIR OUT | D2 |
-| Buzzer GND | GND |
-| Buzzer VCC | 5V, if rated for 5V |
-| Buzzer I/O | D8 |
-| Push button terminal 1 | D4 |
-| Push button terminal 2 | GND |
+**Note:** This README describes the current prototype at a high level. Check the ratings printed on the alarm and power components before wiring or powering the circuit.
 
-## ⚙️ How It Works
-1. The PIR sensor detects movement.
-2. The buzzer sounds when movement is detected.
-3. Holding the button silences the buzzer.
-4. If movement is still detected after releasing the button, the buzzer sounds again.
-5. When movement is no longer detected, the alarm turns off.
+## What I'm Learning
+- Reading motion sensor signals
+- Controlling a relay with an Arduino
+- Separating a control circuit from a switched load
+- Building and documenting electronics projects
 
-## 🚀 Future Improvements
-- Bluetooth alerts to a nearby phone
-- A custom enclosure
-- Battery-powered portable operation
-
-## 🎯 Project Goal
-To learn Arduino programming, motion sensing, digital inputs and outputs, and basic electronics through a practical security project.
-
-**Built with curiosity and Arduino!** 🔧
+NightGuard is a learning project and is still being developed.
